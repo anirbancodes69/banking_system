@@ -1,4 +1,7 @@
 <?php
+
+require_once ("dbcon.php");
+
 // login.php
 session_start();
 
@@ -6,13 +9,6 @@ session_start();
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
     $password = $_POST['password'];
-
-    // Database connection
-    $conn = new mysqli('localhost', 'root', 'Mysqlisbest@1', 'banking_system_db');
-
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
 
     $sql = "SELECT id, username, password, status, is_admin FROM users WHERE username = ?";
     $stmt = $conn->prepare($sql);

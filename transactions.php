@@ -1,4 +1,7 @@
 <?php
+
+require_once ("dbcon.php");
+
 // transactions.php
 session_start();
 
@@ -7,12 +10,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['is_admin']) {
     exit();
 }
 
-// Database connection
-$conn = new mysqli('localhost', 'root', 'Mysqlisbest@1', 'banking_system_db');
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
 
 $sql = "SELECT type, amount, date, approved FROM transactions WHERE user_id = ?";
 $stmt = $conn->prepare($sql);

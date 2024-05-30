@@ -1,4 +1,7 @@
 <?php
+
+require_once ("dbcon.php");
+
 // send_cheques.php
 session_start();
 
@@ -11,13 +14,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $amount = $_POST['amount'];
     $recipient = $_POST['recipient'];
 
-    // Database connection
-    $conn = new mysqli('localhost', 'root', 'Mysqlisbest@1', 'banking_system_db');
-
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
-
     $sql = "SELECT SUM(amount) as balance FROM transactions WHERE user_id = ? and type = 'credit'";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $_SESSION['user_id']);
@@ -26,7 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->fetch();
     $stmt->close();
 
-    $sql = "SELECT SUM(amount) as balance FROM transactions WHERE user_id = ? and type = 'withdraw'";
+    $sql = "SELECT SUM(amount) as balance FROM transactions WHERE user_id = ? and type = 'withdraw' OR (type = 'cheque' and approved = TRUE)";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $_SESSION['user_id']);
     $stmt->execute();

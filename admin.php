@@ -1,4 +1,6 @@
 <?php
+require_once ("dbcon.php");
+
 // admin.php
 session_start();
 
@@ -8,11 +10,7 @@ if (!isset($_SESSION['is_admin']) || !$_SESSION['is_admin']) {
     exit();
 }
 
-$conn = new mysqli('localhost', 'root', 'Mysqlisbest@1', 'banking_system_db');
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['user_id'])) {
     $user_id = $_POST['user_id'];

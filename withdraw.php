@@ -1,17 +1,13 @@
 <?php
+
+require_once ("dbcon.php");
+
 // withdraw.php
 session_start();
 
 if (!isset($_SESSION['user_id']) || $_SESSION['is_admin']) {
     header("Location: login.php");
     exit();
-}
-
-// Database connection
-$conn = new mysqli('localhost', 'root', 'Mysqlisbest@1', 'banking_system_db');
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
 }
 
 // Check if the user has enough balance
@@ -23,7 +19,7 @@ $stmt->bind_result($c_balance);
 $stmt->fetch();
 $stmt->close();
 
-$sql = "SELECT SUM(amount) as balance FROM transactions WHERE user_id = ? and type = 'withdraw'";
+$sql = "SELECT SUM(amount) as balance FROM transactions WHERE user_id = ? and type = 'withdraw' OR (type = 'cheque' and approved = TRUE)";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $_SESSION['user_id']);
 $stmt->execute();

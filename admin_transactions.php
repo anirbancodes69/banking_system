@@ -1,5 +1,6 @@
 <?php
-// admin_transactions.php
+require_once ("dbcon.php");
+
 session_start();
 
 // Check if the user is an admin
@@ -8,22 +9,37 @@ if (!isset($_SESSION['is_admin']) || !$_SESSION['is_admin']) {
     exit();
 }
 
-$conn = new mysqli('localhost', 'root', 'Mysqlisbest@1', 'banking_system_db');
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['transaction_id'])) {
-    $transaction_id = $_POST['transaction_id'];
-    $sql = "UPDATE transactions SET approved = TRUE WHERE id = ?";
+function enqueue($transaction_id, $conn)
+{
+    $sql = "INSERT INTO queue (transaction_id, status) VALUES (?, 'pending')";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $transaction_id);
     $stmt->execute();
     $stmt->close();
+}
+
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['transaction_id'])) {
+    $transaction_id = $_POST['transaction_id'];
+
+    // Start a transaction
+    $conn->begin_transaction();
+
+    try {
+        // Enqueue the task
+        enqueue($transaction_id, $conn);
+
+        // Commit the transaction
+        $conn->commit();
+        echo "Cheque approval enqueued successfully!";
+    } catch (Exception $e) {
+        // Rollback the transaction on failure
+        $conn->rollback();
+        echo "Error: " . $e->getMessage();
+    }
 
     header("Location: admin_transactions.php");
-
+    exit();
 }
 
 $sql = "SELECT t.id, u.username, t.type, t.amount, t.date, t.approved 
